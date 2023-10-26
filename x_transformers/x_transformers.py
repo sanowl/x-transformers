@@ -26,6 +26,7 @@ class LayerIntermediates:
     attn_intermediates: Optional[List[Intermediates]] = None
     layer_hiddens: Optional[List[Tensor]] = None
     attn_z_loss: Optional[Tensor] = None
+    head_diversity_loss: Optional[Tensor] = None
     mems: Optional[Tensor] = None
     memory_tokens: Optional[Tensor] = None
 
@@ -79,6 +80,12 @@ def Sequential(*modules):
 def max_neg_value(tensor):
     return -torch.finfo(tensor.dtype).max
 
+def log(t, eps = 1e-20):
+    return t.clamp(min = eps).log()
+
+def entropy(prob, dim = -1):
+    return (-prob * log(prob)).sum(dim = dim)
+
 def l2norm(t, groups = 1):
     t = rearrange(t, '... (g d) -> ... g d', g = groups)
     t = F.normalize(t, p = 2, dim = -1)
@@ -118,6 +125,18 @@ def calc_z_loss(
         return loss.mean() * weight
 
     loss = loss[mask].sum() / mask.sum().clamp(min = 1e-5)
+    return loss * weight
+
+def head_diversity_loss(
+    post_softmax_attns: List[Tensor],
+    weight = 1.
+):
+    loss = 0.
+
+    for attn in post_softmax_attns:
+        avg_head_attn = reduce(attn, 'b h i j -> b i j', 'mean')
+        loss = loss - entropy(avg_head_attn).mean()
+
     return loss * weight
 
 # init helpers
@@ -1501,6 +1520,8 @@ class TransformerWrapper(nn.Module):
         sum_embeds = None,
         return_attn_z_loss = False,
         attn_z_loss_weight = 1e-4,
+        return_head_diversity_loss = False,
+        head_diversity_loss_weight = 1e-1,
         seq_start_pos = None,
         cache: Optional[LayerIntermediates] = None,
         **kwargs
@@ -1593,6 +1614,11 @@ class TransformerWrapper(nn.Module):
         if return_attn_z_loss:
             pre_softmax_attns = list(map(lambda t: t.pre_softmax_attn, intermediates.attn_intermediates))
             intermediates.attn_z_loss = calc_z_loss(pre_softmax_attns, weight = attn_z_loss_weight)
+            return_intermediates = True
+
+        if return_head_diversity_loss:
+            post_softmax_attns = list(map(lambda t: t.post_softmax_attn, intermediates.attn_intermediates))
+            intermediates.head_diversity_loss = head_diversity_loss(post_softmax_attns, weight = head_diversity_loss_weight)
             return_intermediates = True
 
         if return_mems:
