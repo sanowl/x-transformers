@@ -1001,7 +1001,6 @@ class AttentionLayers(nn.Module):
         cross_residual_attn = False,
         macaron = False,
         pre_norm = True,
-        pre_norm_has_final_norm = True,
         gate_residual = False,
         scale_residual = False,
         scale_residual_constant = 1.,
