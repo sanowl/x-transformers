@@ -134,7 +134,7 @@ def head_diversity_loss(
     loss = 0.
 
     for attn in post_softmax_attns:
-        avg_head_attn = reduce(attn, 'b h i j -> b i j', 'mean')
+        avg_head_attn = reduce(attn, 'b h i j -> i j', 'mean')
         loss = loss - entropy(avg_head_attn).mean()
 
     return loss * weight
