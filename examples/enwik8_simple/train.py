@@ -1,7 +1,5 @@
 from x_transformers import TransformerWrapper, Decoder
 from x_transformers.autoregressive_wrapper import AutoregressiveWrapper
-
-import random
 import tqdm
 import gzip
 import numpy as np
@@ -9,6 +7,7 @@ import torch
 import torch.optim as optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, Dataset
+import secrets
 
 # constants
 
@@ -102,7 +101,7 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10., desc='training'):
 
     if i % GENERATE_EVERY == 0:
         model.eval()
-        inp = random.choice(val_dataset)[:-1]
+        inp = secrets.SystemRandom().choice(val_dataset)[:-1]
         prime = decode_tokens(inp)
         print(f'%s \n\n %s', (prime, '*' * 100))
 
