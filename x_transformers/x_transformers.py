@@ -1161,7 +1161,7 @@ class AttentionLayers(nn.Module):
         self.layer_types = layer_types
         self.layers_execute_order = default(layers_execute_order, tuple(range(len(layer_types))))
 
-        assert all([i < len(self.layer_types) for i in self.layers_execute_order])
+        assert all(i < len(self.layer_types) for i in self.layers_execute_order)
 
         self.num_attn_layers = len(list(filter(equals('a'), layer_types)))
 
