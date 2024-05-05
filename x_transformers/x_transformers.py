@@ -1600,7 +1600,7 @@ class TransformerWrapper(nn.Module):
         pos = None,
         prepend_embeds = None,
         prepend_mask = None,
-        embed_ids: Dict[str, Tensor] = dict(),
+        embed_ids: Optional[Dict[str, Tensor]] = None,
         sum_embeds = None,
         return_attn_z_loss = False,
         attn_z_loss_weight = 1e-4,
@@ -1608,6 +1608,7 @@ class TransformerWrapper(nn.Module):
         cache: Optional[LayerIntermediates] = None,
         **kwargs
     ):
+        embed_ids = {} if embed_ids is None else embed_ids
         b, n, device, num_mems, has_memory_tokens, emb_frac_gradient = x.shape[0], x.shape[1], x.device, self.num_memory_tokens, self.num_memory_tokens > 0, self.emb_frac_gradient
         return_hiddens = return_mems | return_attn | return_intermediates | return_attn_z_loss
 

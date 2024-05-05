@@ -137,14 +137,16 @@ class AutoregressiveWrapper(Module):
         filter_logits_fn: Callable = top_k,
         restrict_to_max_seq_len = True,
         amateur_model: Optional[Union[Module, Tuple[Module]]] = None,
-        filter_kwargs: dict = dict(),
-        contrastive_decode_kwargs: Union[dict, Tuple[dict]] = dict(
-            beta = 0.5,
-            alpha = 0.1
-        ),
+        filter_kwargs: Optional[dict] = None,
+        contrastive_decode_kwargs: Optional[Union[dict, Tuple[dict]]] = None,
         cache_kv = True,
         **kwargs
     ):
+        filter_kwargs = {} if filter_kwargs is None else filter_kwargs
+        contrastive_decode_kwargs = dict(
+                beta = 0.5,
+                alpha = 0.1
+            ) if contrastive_decode_kwargs is None else contrastive_decode_kwargs
         max_seq_len, greedy, device = self.max_seq_len, temperature == 0., prompts.device
 
         prompts, ps = pack([prompts], '* n')

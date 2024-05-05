@@ -8,7 +8,7 @@ import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
 
-from typing import Callable
+from typing import Optional, Callable
 from collections import namedtuple
 
 from einops import rearrange
@@ -206,10 +206,11 @@ class XValAutoregressiveWrapper(nn.Module):
         start_numbers: Tensor,
         seq_len,
         filter_logits_fn: Callable = top_k,
-        filter_kwargs: dict = dict(),
+        filter_kwargs: Optional[dict] = None,
         temperature = 1.,
         **kwargs
     ):
+        filter_kwargs = {} if filter_kwargs is None else filter_kwargs
         device = start_tokens.device
         was_training = self.net.training
         num_dims = len(start_tokens.shape)
