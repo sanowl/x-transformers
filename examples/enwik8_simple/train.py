@@ -104,7 +104,7 @@ for i in tqdm.tqdm(range(NUM_BATCHES), mininterval=10., desc='training'):
         model.eval()
         inp = random.choice(val_dataset)[:-1]
         prime = decode_tokens(inp)
-        print(f'%s \n\n %s', (prime, '*' * 100))
+        print('%s \n\n %s', (prime, '*' * 100))
 
         sample = model.generate(
             prompts = inp,
