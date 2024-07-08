@@ -1,5 +1,4 @@
 import math
-from random import random
 from typing import Dict
 from packaging import version
 
@@ -18,6 +17,7 @@ from einops.layers.torch import Rearrange
 
 from x_transformers.attend import Attend, Intermediates
 from x_transformers.autoregressive_wrapper import AutoregressiveWrapper
+import secrets
 
 # constants
 
@@ -1305,7 +1305,7 @@ class AttentionLayers(nn.Module):
         for ind, (layer_type, (norm, block, residual_fn), layer_dropout) in enumerate(zip(*layer_variables)):
             is_last = ind == (len(self.layers) - 1)
 
-            if self.training and layer_dropout > 0. and random() < layer_dropout:
+            if self.training and layer_dropout > 0. and secrets.SystemRandom().random() < layer_dropout:
                 continue
 
             if layer_type == 'a':
