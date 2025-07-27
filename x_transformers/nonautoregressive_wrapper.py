@@ -1,5 +1,4 @@
 import math
-from random import random
 from contextlib import nullcontext
 from collections import namedtuple
 
@@ -11,6 +10,7 @@ from einops import rearrange, repeat, pack, unpack
 
 from x_transformers.x_transformers import TransformerWrapper
 from typing import Optional
+import secrets
 
 # constants
 
@@ -46,7 +46,7 @@ def gumbel_sample(t, temperature = 1., dim = -1):
 # prob helpers
 
 def sample_prob(prob):
-    return random() < prob
+    return secrets.SystemRandom().random() < prob
 
 def coin_flip():
     return sample_prob(0.5)
@@ -319,7 +319,7 @@ class NonAutoregressiveWrapper(nn.Module):
         if not exists(self.token_critic) or only_train_generator:
             return Losses(loss, loss, None)
 
-        sampled_ids = gumbel_sample(logits, temperature = default(generator_sample_temperature, random()))
+        sampled_ids = gumbel_sample(logits, temperature = default(generator_sample_temperature, secrets.SystemRandom().random()))
         generated = torch.where(mask, sampled_ids, orig_seq)
 
         critic_logits = self.token_critic(generated)
